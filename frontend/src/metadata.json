@@ -1,0 +1,5 @@
+{
+  "name": "Naver Review Insight AI",
+  "description": "An AI-powered dashboard to analyze Naver Shopping products, simulate review scraping using Search Grounding, and converse with product data via Gemini Live.",
+  "requestFramePermissions": ["microphone"]
+}
