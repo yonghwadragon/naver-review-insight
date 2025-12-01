@@ -22,6 +22,11 @@ export const analyzeUrlWithSearch = async (
   try {
     const response = await fetch(`${baseUrl}/scrape`, {
       method: "POST",
+      // 👇👇👇 [핵심 수정] 이 부분이 추가되었습니다! 👇👇👇
+      headers: {
+        "ngrok-skip-browser-warning": "69420", 
+      },
+      // 👆👆👆 Ngrok 경고창을 무시하는 프리패스권입니다 👆👆👆
       body: formData,
     });
 
