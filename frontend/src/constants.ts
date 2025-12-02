@@ -74,6 +74,6 @@ export const TRANSLATIONS = {
     liveConnecting: "Connecting...",
     liveDesc: "Gemini Live Audio",
     navStartVoice: "Start Voice Chat",
-    footer: "© 2025 Review Insight AI. Powered by Gemini 2.0 · Made by Yonghwa"
+    footer: "© 2025 Review Insight AI. Powered by Gemini 2.0, Made by Yonghwa"
   }
 };
