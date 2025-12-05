@@ -1,0 +1,27 @@
+{
+  "name": "naver-review-insight",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yonghwadragon/naver-review-insight.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yonghwadragon/naver-review-insight/issues"
+  },
+  "homepage": "https://github.com/yonghwadragon/naver-review-insight#readme",
+  "description": "",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
