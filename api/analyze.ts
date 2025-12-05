@@ -11,7 +11,6 @@ const corsHeaders = {
 };
 
 export default async function handler(request: Request) {
-  // Preflight 처리
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -27,7 +26,7 @@ export default async function handler(request: Request) {
         });
       }
 
-      // [1] 통계 직접 계산
+      // [1] 통계 계산 (전체 데이터 사용 - 이건 돈 안 듦)
       let totalRating = 0;
       let positive = 0;
       let neutral = 0;
@@ -49,10 +48,10 @@ export default async function handler(request: Request) {
         negative
       };
 
-      // [2] AI 분석 (Gemini)
+      // [2] AI 분석 (Gemini) - 429 에러 방지 핵심!
       const apiKey = process.env.GEMINI_API_KEY;
       let aiInsights = {
-        summary: "AI 분석 대기 중...",
+        summary: "AI 분석 결과를 불러오지 못했습니다.",
         keywords: [],
         pain_points: []
       };
@@ -62,22 +61,25 @@ export default async function handler(request: Request) {
           const genAI = new GoogleGenerativeAI(apiKey);
           const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-          // 토큰 절약을 위해 텍스트만 추출 (최대 100개)
-          const reviewTexts = reviews.slice(0, 100).map((r: any) => 
-            `- (평점:${r.rating}) ${r.content}`
+          // [핵심] AI에게는 최대 30개만 보여줍니다. (토큰 절약 & 429 방지)
+          // 섞어서 보내지 말고 최신순 30개만 보내도 분석에는 충분합니다.
+          const limitedReviews = reviews.slice(0, 30); 
+          
+          const reviewTexts = limitedReviews.map((r: any) => 
+            `- (${r.rating}점) ${r.content}`
           ).join("\n");
 
           const prompt = `
-            너는 리뷰 데이터 분석가야. 아래 데이터를 분석해줘.
+            너는 리뷰 분석가야. 아래 리뷰 샘플을 보고 분석해줘.
             
-            [통계] 리뷰수:${stats.total}, 평점:${stats.averageRating}
-            [리뷰]
+            [통계 정보] 전체 ${stats.total}개, 평균 ${stats.averageRating}점
+            [리뷰 샘플 (최신 30개)]
             ${reviewTexts}
 
             [요청] JSON 포맷으로만 답해.
-            1. summary: 3줄 요약
+            1. summary: 전체적인 분위기 3줄 요약
             2. keywords: 핵심 키워드 5개
-            3. pain_points: 불만/단점 3개
+            3. pain_points: 주요 불만사항 3개
             
             {"summary": "...", "keywords": [], "pain_points": []}
           `;
@@ -85,10 +87,13 @@ export default async function handler(request: Request) {
           const result = await model.generateContent(prompt);
           const text = result.response.text().replace(/```json|```/g, "").trim();
           aiInsights = JSON.parse(text);
-        } catch (e) { console.error("AI Error", e); }
+        } catch (e) { 
+            console.error("AI Error:", e); 
+            // AI가 실패해도 통계는 보여주기 위해 에러 무시
+        }
       }
 
-      // [3] 결과 병합 반환
+      // [3] 결과 반환
       return new Response(JSON.stringify({
         success: true,
         reportId: `report_${Date.now()}`,
@@ -110,8 +115,6 @@ export default async function handler(request: Request) {
       });
     }
   }
-
-  return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
-    status: 405, headers: corsHeaders
-  });
+  
+  return new Response("Method Not Allowed", { status: 405 });
 }
